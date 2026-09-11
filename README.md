@@ -1,15 +1,16 @@
-# (TODO: your game's title)
+# Afterlife Metal
 
-Author: (TODO: your name)
+Author: Raeshana Sookhoo
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: The player's progression builds the background music itself.
 
 Screen Shot:
 
-![Screen Shot](screenshot.png)
+![Screen Shot](screenshot_afterlife-metal_1.png)
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+It's not death metal, but it isn't life metal either-- no, it's AFTERLIFE metal! 
+Find and play the instruments of each ghost to return music to the world.
 
 This game was built with [NEST](NEST.md).
