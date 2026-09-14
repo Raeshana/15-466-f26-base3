@@ -9,6 +9,7 @@
 #include "data_path.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 #include <random>
 
@@ -77,7 +78,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	if (evt.type == SDL_EVENT_KEY_DOWN) {
 		if (evt.key.key == SDLK_ESCAPE) {
-			SDL_SetWindowRelativeMouseMode(Mode::window, false);
+			//toggle mouse mode
+			if (SDL_GetWindowRelativeMouseMode(Mode::window) == false){
+				SDL_SetWindowRelativeMouseMode(Mode::window, true);
+			}
+			else SDL_SetWindowRelativeMouseMode(Mode::window, false);
 			return true;
 		} else if (evt.key.key == SDLK_A) {
 			left.downs += 1;
@@ -114,21 +119,12 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = false;
 			return true;
 		}
-	} else if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-		if (SDL_GetWindowRelativeMouseMode(Mode::window) == false) {
-			SDL_SetWindowRelativeMouseMode(Mode::window, true);
-			return true;
-		}
 	} else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
 		if (SDL_GetWindowRelativeMouseMode(Mode::window) == true) {
-			glm::vec2 motion = glm::vec2(
+			//get mouse motion
+			motion = glm::vec2(
 				evt.motion.xrel / float(window_size.y),
 				-evt.motion.yrel / float(window_size.y)
-			);
-			camera->transform->rotation = glm::normalize(
-				camera->transform->rotation
-				* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
-				* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
 			);
 			return true;
 		}
@@ -159,6 +155,18 @@ void PlayMode::update(float elapsed) {
 	//move sound to follow leg tip position:
 	// leg_tip_loop->set_position(get_leg_tip_position(), 1.0f / 60.0f);
 
+	//adapted from original code
+	//rotate camera:
+	if (SDL_GetWindowRelativeMouseMode(Mode::window) == true){
+		camera->transform->rotation = glm::normalize(
+			camera->transform->rotation
+			* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
+			* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
+		);
+		//reset motion
+		motion = glm::vec2(0.0f);
+	}
+
 	//move camera:
 	{
 
@@ -177,6 +185,12 @@ void PlayMode::update(float elapsed) {
 		glm::vec3 frame_right = frame[0];
 		//glm::vec3 up = frame[1];
 		glm::vec3 frame_forward = -frame[2];
+		if (frame_forward == glm::vec3(-1,0,0)){
+			std::cout << "yay";
+		}
+		else {
+			std::cout << "no yay";
+		}
 
 		camera->transform->position += move.x * frame_right + move.y * frame_forward;
 	}

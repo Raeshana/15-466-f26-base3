@@ -48,4 +48,7 @@ struct PlayMode : Mode {
 	//camera:
 	Scene::Camera *camera = nullptr;
 
+	//motion:
+	glm::vec2 motion;
+
 };
