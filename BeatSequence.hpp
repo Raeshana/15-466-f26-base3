@@ -7,13 +7,18 @@ class BeatSequence {
     std::string sequenceString = "";
     int idx = 0;
 
-    bool iterateIdx() {
-        idx++;
-        if (idx >= 5) return true;
-        return false;
+    bool iterateIdx(unsigned int key, unsigned int sequenceKey) {
+        if (key == sequenceKey) {
+            idx++;
+            return true;
+        }
+        else {
+            return restartIdx();
+        }
     }
 
-    void restartIdx() {
+    bool restartIdx() {
         idx = 0;
+        return false;
     }
 };

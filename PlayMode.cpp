@@ -96,6 +96,33 @@ PlayMode::~PlayMode() {
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
 
+	if (canDrawBeat1){
+		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
+			std::cout << "BEAT 1 ITERATED";
+			if (beat1.idx >= 5){
+				std::cout << "BEAT 1 YAY";
+			} 
+		}
+		// else 
+		// 	std::cout << "BEAT 1 FAILED TO ITERATE";
+	}
+
+	if (canDrawBeat2){
+		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
+			if (beat1.idx >= 5){
+				std::cout << "BEAT 2 YAY";
+			} 
+		}
+	}
+
+	if (canDrawBeat2){
+		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
+			if (beat1.idx >= 5){
+				std::cout << "BEAT 3 YAY";
+			} 
+		}
+	}
+
 	if (evt.type == SDL_EVENT_KEY_DOWN) {
 		if (evt.key.key == SDLK_ESCAPE) {
 			//toggle mouse mode
@@ -208,7 +235,8 @@ void PlayMode::update(float elapsed) {
 		//glm::vec3 up = frame[1];
 		glm::vec3 frame_forward = -frame[2];
 
-		//remove camera's z movement
+		//remove camera's z movement:
+		//this does not do what I want it to!!!
 		frame_forward.z = 0.0f;
 		frame_forward = glm::normalize(frame_forward);
 
