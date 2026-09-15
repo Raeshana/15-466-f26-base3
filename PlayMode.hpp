@@ -3,6 +3,8 @@
 #include "Scene.hpp"
 #include "Sound.hpp"
 
+#include "BeatSequence.hpp"
+
 #include <glm/glm.hpp>
 
 #include <vector>
@@ -28,14 +30,10 @@ struct PlayMode : Mode {
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
 
-	//graveyard leg to wobble:
-	// Scene::Transform *hip = nullptr;
-	// Scene::Transform *upper_leg = nullptr;
-	// Scene::Transform *lower_leg = nullptr;
-	// glm::quat hip_base_rotation;
-	// glm::quat upper_leg_base_rotation;
-	// glm::quat lower_leg_base_rotation;
-	// float wobble = 0.0f;
+	//tombstones
+	Scene::Transform *Tombstone1 = nullptr;
+	Scene::Transform *Tombstone2 = nullptr;
+	Scene::Transform *Tombstone3 = nullptr;
 
 	// glm::vec3 get_leg_tip_position();
 
@@ -51,4 +49,13 @@ struct PlayMode : Mode {
 	//motion:
 	glm::vec2 motion;
 
+	//beat sequences:
+	BeatSequence beat1;
+	BeatSequence beat2;
+	BeatSequence beat3;
+
+	//beat sequence bools:
+	bool canDrawBeat1 = false;
+	bool canDrawBeat2 = false;
+	bool canDrawBeat3 = false;
 };

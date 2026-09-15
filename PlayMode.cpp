@@ -48,19 +48,25 @@ Load< Sound::Sample > honk_sample(LoadTagDefault, []() -> Sound::Sample const * 
 
 
 PlayMode::PlayMode() : scene(*graveyard_scene) {
-	// //get pointers to leg for convenience:
-	// for (auto &transform : scene.transforms) {
-	// 	if (transform.name == "Hip.FL") hip = &transform;
-	// 	else if (transform.name == "UpperLeg.FL") upper_leg = &transform;
-	// 	else if (transform.name == "LowerLeg.FL") lower_leg = &transform;
-	// }
-	// if (hip == nullptr) throw std::runtime_error("Hip not found.");
-	// if (upper_leg == nullptr) throw std::runtime_error("Upper leg not found.");
-	// if (lower_leg == nullptr) throw std::runtime_error("Lower leg not found.");
+	//Populate the 3 beat sequences
+	beat1.sequence = {SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4};
+	beat1.sequenceString = "0 1 2 3 4";
 
-	// hip_base_rotation = hip->rotation;
-	// upper_leg_base_rotation = upper_leg->rotation;
-	// lower_leg_base_rotation = lower_leg->rotation;
+	beat2.sequence = {SDLK_4, SDLK_2, SDLK_5, SDLK_1, SDLK_5};
+	beat2.sequenceString = "4 2 5 1 5";
+
+	beat3.sequence = {SDLK_3, SDLK_4, SDLK_1, SDLK_5, SDLK_1};
+	beat3.sequenceString = "3 4 1 5 1";
+
+	//get pointers to tombstones for convenience:
+	for (auto &transform : scene.transforms) {
+		if (transform.name == "Tombstone1") Tombstone1 = &transform;
+		else if (transform.name == "Tombstone2") Tombstone2 = &transform;
+		else if (transform.name == "Tombstone3") Tombstone3 = &transform;
+	}
+	if (Tombstone1 == nullptr) throw std::runtime_error("Tombstone1 not found.");
+	if (Tombstone2 == nullptr) throw std::runtime_error("Tombstone2 not found.");
+	if (Tombstone3 == nullptr) throw std::runtime_error("Tombstone3 not found.");
 
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
@@ -105,6 +111,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		// 	if (honk_oneshot) honk_oneshot->stop();
 		// 	honk_oneshot = Sound::play_3D(*honk_sample, 0.3f, glm::vec3(4.6f, -7.8f, 6.9f)); //hardcoded position of front of car, from blender
 		// }
+	} else if (evt.key.key == SDLK_SPACE) {
+		std::cout << glm::distance(camera->transform->position, Tombstone1->position) << "\n";
 	} else if (evt.type == SDL_EVENT_KEY_UP) {
 		if (evt.key.key == SDLK_A) {
 			left.pressed = false;
@@ -135,22 +143,22 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void PlayMode::update(float elapsed) {
 
-	// //slowly rotates through [0,1):
-	// wobble += elapsed / 10.0f;
-	// wobble -= std::floor(wobble);
-
-	// hip->rotation = hip_base_rotation * glm::angleAxis(
-	// 	glm::radians(5.0f * std::sin(wobble * 2.0f * float(M_PI))),
-	// 	glm::vec3(0.0f, 1.0f, 0.0f)
-	// );
-	// upper_leg->rotation = upper_leg_base_rotation * glm::angleAxis(
-	// 	glm::radians(7.0f * std::sin(wobble * 2.0f * 2.0f * float(M_PI))),
-	// 	glm::vec3(0.0f, 0.0f, 1.0f)
-	// );
-	// lower_leg->rotation = lower_leg_base_rotation * glm::angleAxis(
-	// 	glm::radians(10.0f * std::sin(wobble * 3.0f * 2.0f * float(M_PI))),
-	// 	glm::vec3(0.0f, 0.0f, 1.0f)
-	// );
+	//if the player is at most 15 units away from a tombstone,
+	//display 'numbers' to press
+	if(glm::distance(camera->transform->position, Tombstone1->position) <= 15.0f) {
+		canDrawBeat1 = true;
+	}
+	else if(glm::distance(camera->transform->position, Tombstone2->position) <= 15.0f) {
+		canDrawBeat2 = true;
+	}
+	else if(glm::distance(camera->transform->position, Tombstone3->position) <= 15.0f) {
+		canDrawBeat3 = true;
+	}
+	else {
+		canDrawBeat1 = false;
+		canDrawBeat2 = false;
+		canDrawBeat3 = false;
+	}
 
 	//move sound to follow leg tip position:
 	// leg_tip_loop->set_position(get_leg_tip_position(), 1.0f / 60.0f);
@@ -185,12 +193,10 @@ void PlayMode::update(float elapsed) {
 		glm::vec3 frame_right = frame[0];
 		//glm::vec3 up = frame[1];
 		glm::vec3 frame_forward = -frame[2];
-		if (frame_forward == glm::vec3(-1,0,0)){
-			std::cout << "yay";
-		}
-		else {
-			std::cout << "no yay";
-		}
+
+		//remove camera's z movement
+		frame_forward.z = 0.0f;
+		frame_forward = glm::normalize(frame_forward);
 
 		camera->transform->position += move.x * frame_right + move.y * frame_forward;
 	}
@@ -241,15 +247,39 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		));
 
 		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
+		float ofs = 2.0f / drawable_size.y;
+
+		//overlay beat sequence
+		if (canDrawBeat1) {
+			lines.draw_text("Press these keys to play some afterlife metal: " + beat1.sequenceString,
 			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
+			lines.draw_text("Press these keys to play some afterlife metal: " + beat1.sequenceString,
 			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		}
+		if (canDrawBeat2) {
+			lines.draw_text("Press the keys to play some afterlife metal: " + beat2.sequenceString,
+			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
+			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
+			lines.draw_text("Press the keys to play some afterlife metal: " + beat2.sequenceString,
+			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
+			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		}
+		if (canDrawBeat3) {
+			lines.draw_text("Press the keys to play some afterlife metal: " + beat3.sequenceString,
+			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
+			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
+			lines.draw_text("Press the keys to play some afterlife metal: " + beat3.sequenceString,
+			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
+			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		}
 	}
 	GL_ERRORS();
 }
