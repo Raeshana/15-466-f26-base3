@@ -57,12 +57,15 @@ PlayMode::PlayMode() : scene(*graveyard_scene) {
 	//Populate the 3 beat sequences
 	beat1.sequence = {SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4};
 	beat1.sequenceString = "0 1 2 3 4";
+	beat1.initializeIdx();
 
 	beat2.sequence = {SDLK_4, SDLK_2, SDLK_5, SDLK_1, SDLK_5};
 	beat2.sequenceString = "4 2 5 1 5";
+	beat2.initializeIdx();
 
 	beat3.sequence = {SDLK_3, SDLK_4, SDLK_1, SDLK_5, SDLK_1};
 	beat3.sequenceString = "3 4 1 5 1";
+	beat3.initializeIdx();
 
 	//get pointers to tombstones for convenience:
 	for (auto &transform : scene.transforms) {
@@ -91,44 +94,16 @@ PlayMode::~PlayMode() {
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
 
-	if (canDrawBeat1){
-		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
-			std::cout << "BEAT 1 ITERATED";
-			guitar_loop->position = Tombstone1->position;
-			if (beat1.idx >= 5){
-				std::cout << "BEAT 1 YAY";
-			} 
-		}
-		// else 
-		// 	std::cout << "BEAT 1 FAILED TO ITERATE";
-	}
-
-	if (canDrawBeat2){
-		if (beat2.iterateIdx(evt.key.key, beat2.sequence[beat2.idx])){
-			bass_loop->position = Tombstone2->position;
-			if (beat2.idx >= 5){
-				std::cout << "BEAT 2 YAY";
-			} 
-		}
-	}
-
-	if (canDrawBeat3){
-		if (beat3.iterateIdx(evt.key.key, beat3.sequence[beat3.idx])){
-			drums_loop->position = Tombstone3->position;
-			if (beat3.idx >= 5){
-				std::cout << "BEAT 3 YAY";
-			} 
-		}
-	}
-
 	if (evt.type == SDL_EVENT_KEY_DOWN) {
+		//toggle mouse mode
 		if (evt.key.key == SDLK_ESCAPE) {
-			//toggle mouse mode
+			
 			if (SDL_GetWindowRelativeMouseMode(Mode::window) == false){
 				SDL_SetWindowRelativeMouseMode(Mode::window, true);
 			}
 			else SDL_SetWindowRelativeMouseMode(Mode::window, false);
 			return true;
+		//WASD movement
 		} else if (evt.key.key == SDLK_A) {
 			left.downs += 1;
 			left.pressed = true;
@@ -145,11 +120,27 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.downs += 1;
 			down.pressed = true;
 			return true;
-		} 
-		// else if (evt.key.key == SDLK_SPACE) {
-		// 	if (honk_oneshot) honk_oneshot->stop();
-		// 	honk_oneshot = Sound::play_3D(*honk_sample, 0.3f, glm::vec3(4.6f, -7.8f, 6.9f)); //hardcoded position of front of car, from blender
-		// }
+		} else if (canDrawBeat1){
+			if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
+				// std::cout << "BEAT 1 ITERATED\n" << "beat1.idx = " << beat1.idx << "\n";
+				if (beat1.idx >= 5){
+					guitar_loop->position = Tombstone1->position;
+					// std::cout << "BEAT 1 YAY";
+				} 
+			}
+		} else if (canDrawBeat2){
+			if (beat2.iterateIdx(evt.key.key, beat2.sequence[beat2.idx])){
+				if (beat2.idx >= 5){
+					bass_loop->position = Tombstone2->position;
+				} 
+			}
+		} if (canDrawBeat3){
+			if (beat3.iterateIdx(evt.key.key, beat3.sequence[beat3.idx])){
+				if (beat3.idx >= 5){
+					drums_loop->position = Tombstone3->position;
+				} 
+			}
+		}
 	// } else if (evt.key.key == SDLK_SPACE) {
 	// 	std::cout << glm::distance(camera->transform->position, Tombstone1->position) << "\n";
 	} else if (evt.type == SDL_EVENT_KEY_UP) {
@@ -198,9 +189,6 @@ void PlayMode::update(float elapsed) {
 		canDrawBeat2 = false;
 		canDrawBeat3 = false;
 	}
-
-	//move sound to follow leg tip position:
-	// leg_tip_loop->set_position(get_leg_tip_position(), 1.0f / 60.0f);
 
 	//adapted from original code
 	//rotate camera:
@@ -323,8 +311,3 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	}
 	GL_ERRORS();
 }
-
-// glm::vec3 PlayMode::get_leg_tip_position() {
-// 	//the vertex position here was read from the model in blender:
-// 	return lower_leg->make_world_from_local() * glm::vec4(-1.26137f, -11.861f, 0.0f, 1.0f);
-// }
