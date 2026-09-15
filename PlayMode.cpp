@@ -108,16 +108,16 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	}
 
 	if (canDrawBeat2){
-		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
-			if (beat1.idx >= 5){
+		if (beat2.iterateIdx(evt.key.key, beat2.sequence[beat2.idx])){
+			if (beat2.idx >= 5){
 				std::cout << "BEAT 2 YAY";
 			} 
 		}
 	}
 
-	if (canDrawBeat2){
-		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
-			if (beat1.idx >= 5){
+	if (canDrawBeat3){
+		if (beat3.iterateIdx(evt.key.key, beat3.sequence[beat3.idx])){
+			if (beat3.idx >= 5){
 				std::cout << "BEAT 3 YAY";
 			} 
 		}

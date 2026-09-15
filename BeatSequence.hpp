@@ -13,12 +13,8 @@ class BeatSequence {
             return true;
         }
         else {
-            return restartIdx();
+            idx = 0;
+            return false;
         }
-    }
-
-    bool restartIdx() {
-        idx = 0;
-        return false;
     }
 };
