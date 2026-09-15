@@ -42,15 +42,15 @@ Load< Sound::Sample > all_instruments(LoadTagDefault, []() -> Sound::Sample cons
 });
 
 Load< Sound::Sample > guitar(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("afterlife-metal_guitar.wav"));
+	return new Sound::Sample(data_path("afterlife-metal_guitar_no-outro.wav"));
 });
 
 Load< Sound::Sample > bass(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("afterlife-metal_bass.wav"));
+	return new Sound::Sample(data_path("afterlife-metal_bass_no-outro.wav"));
 });
 
 Load< Sound::Sample > drums(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("afterlife-metal_drums.wav"));
+	return new Sound::Sample(data_path("afterlife-metal_drums_no-outro.wav"));
 });
 
 PlayMode::PlayMode() : scene(*graveyard_scene) {
@@ -80,9 +80,10 @@ PlayMode::PlayMode() : scene(*graveyard_scene) {
 
 	//start music loop playing:
 	// all_instruments_loop = Sound::loop_3D(*all_instruments, 1.0f, camera->transform->position, 10.0f);
-	// guitar_loop = Sound::loop_3D(*guitar, 1.0f, Tombstone1->position, 10.0f);
-	// bass_loop = Sound::loop_3D(*bass, 1.0f, Tombstone2->position, 10.0f);
-	// drums_loop = Sound::loop_3D(*drums, 1.0f, Tombstone3->position, 10.0f);
+	glm::vec3 offMap =  glm::vec3(-10000.0f, -10000.0f, -10000.0f);
+	guitar_loop = Sound::loop_3D(*guitar, 1.0f,  offMap, 10.0f);
+	bass_loop = Sound::loop_3D(*bass, 1.0f,  offMap, 10.0f);
+	drums_loop = Sound::loop_3D(*drums, 1.0f,  offMap, 10.0f);
 }
 
 PlayMode::~PlayMode() {
@@ -93,7 +94,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	if (canDrawBeat1){
 		if (beat1.iterateIdx(evt.key.key, beat1.sequence[beat1.idx])){
 			std::cout << "BEAT 1 ITERATED";
-			guitar_loop = Sound::loop_3D(*guitar, 1.0f, Tombstone1->position, 10.0f);
+			guitar_loop->position = Tombstone1->position;
 			if (beat1.idx >= 5){
 				std::cout << "BEAT 1 YAY";
 			} 
@@ -104,7 +105,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	if (canDrawBeat2){
 		if (beat2.iterateIdx(evt.key.key, beat2.sequence[beat2.idx])){
-			bass_loop = Sound::loop_3D(*bass, 1.0f, Tombstone2->position, 10.0f);
+			bass_loop->position = Tombstone2->position;
 			if (beat2.idx >= 5){
 				std::cout << "BEAT 2 YAY";
 			} 
@@ -113,7 +114,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	if (canDrawBeat3){
 		if (beat3.iterateIdx(evt.key.key, beat3.sequence[beat3.idx])){
-			drums_loop = Sound::loop_3D(*drums, 1.0f, Tombstone3->position, 10.0f);
+			drums_loop->position = Tombstone3->position;
 			if (beat3.idx >= 5){
 				std::cout << "BEAT 3 YAY";
 			} 
