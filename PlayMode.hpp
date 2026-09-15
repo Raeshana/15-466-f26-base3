@@ -35,13 +35,11 @@ struct PlayMode : Mode {
 	Scene::Transform *Tombstone2 = nullptr;
 	Scene::Transform *Tombstone3 = nullptr;
 
-	// glm::vec3 get_leg_tip_position();
-
-	// //music coming from the tip of the leg (as a demonstration):
-	// std::shared_ptr< Sound::PlayingSample > leg_tip_loop;
-
-	// //car honk sound:
-	// std::shared_ptr< Sound::PlayingSample > honk_oneshot;
+	//sounds:
+	std::shared_ptr< Sound::PlayingSample > all_instruments_loop;
+	std::shared_ptr< Sound::PlayingSample > guitar_loop;
+	std::shared_ptr< Sound::PlayingSample > bass_loop;
+	std::shared_ptr< Sound::PlayingSample > drums_loop;
 	
 	//camera:
 	Scene::Camera *camera = nullptr;

@@ -37,14 +37,26 @@ Load< Scene > graveyard_scene(LoadTagDefault, []() -> Scene const * {
 	});
 });
 
-Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("dusty-floor.opus"));
+Load< Sound::Sample > all_instruments(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("afterlife-metal_all_instruments.wav"));
+});
+
+Load< Sound::Sample > guitar(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("afterlife-metal_guitar.wav"));
+});
+
+Load< Sound::Sample > bass(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("afterlife-metal_bass.wav"));
+});
+
+Load< Sound::Sample > drums(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("afterlife-metal_drums.wav"));
 });
 
 
-Load< Sound::Sample > honk_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("honk.wav"));
-});
+// Load< Sound::Sample > honk_sample(LoadTagDefault, []() -> Sound::Sample const * {
+// 	return new Sound::Sample(data_path("honk.wav"));
+// });
 
 
 PlayMode::PlayMode() : scene(*graveyard_scene) {
@@ -73,8 +85,10 @@ PlayMode::PlayMode() : scene(*graveyard_scene) {
 	camera = &scene.cameras.front();
 
 	//start music loop playing:
-	// (note: position will be over-ridden in update())
-	// leg_tip_loop = Sound::loop_3D(*dusty_floor_sample, 1.0f, get_leg_tip_position(), 10.0f);
+	// all_instruments_loop = Sound::loop_3D(*all_instruments, 1.0f, camera->transform->position, 10.0f);
+	guitar_loop = Sound::loop_3D(*guitar, 1.0f, Tombstone1->position, 10.0f);
+	bass_loop = Sound::loop_3D(*bass, 1.0f, Tombstone2->position, 10.0f);
+	drums_loop = Sound::loop_3D(*drums, 1.0f, Tombstone3->position, 10.0f);
 }
 
 PlayMode::~PlayMode() {
@@ -111,8 +125,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		// 	if (honk_oneshot) honk_oneshot->stop();
 		// 	honk_oneshot = Sound::play_3D(*honk_sample, 0.3f, glm::vec3(4.6f, -7.8f, 6.9f)); //hardcoded position of front of car, from blender
 		// }
-	} else if (evt.key.key == SDLK_SPACE) {
-		std::cout << glm::distance(camera->transform->position, Tombstone1->position) << "\n";
+	// } else if (evt.key.key == SDLK_SPACE) {
+	// 	std::cout << glm::distance(camera->transform->position, Tombstone1->position) << "\n";
 	} else if (evt.type == SDL_EVENT_KEY_UP) {
 		if (evt.key.key == SDLK_A) {
 			left.pressed = false;
